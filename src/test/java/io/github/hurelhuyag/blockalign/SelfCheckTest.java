@@ -1,4 +1,4 @@
-package io.github.hurelhuyag.blockaligned;
+package io.github.hurelhuyag.blockalign;
 
 import java.nio.file.Path;
 
@@ -15,7 +15,7 @@ class SelfCheckTest {
 
     @Test
     void own_sources_are_block_aligned() {
-        BlockAlignedFormatting.assertClean(
+        BlockAlignLint.assertClean(
                 Path.of("src/main/java"),
                 Path.of("src/test/java")
         );

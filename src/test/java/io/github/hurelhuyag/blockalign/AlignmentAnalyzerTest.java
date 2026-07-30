@@ -1,4 +1,4 @@
-package io.github.hurelhuyag.blockaligned;
+package io.github.hurelhuyag.blockalign;
 
 import java.util.List;
 
@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test;
 class AlignmentAnalyzerTest {
 
     private static List<Violation> java(String source) {
-        return BlockAlignedFormatting.checkSource("x.java", source, Language.JAVA);
+        return BlockAlignLint.checkSource("x.java", source, Language.JAVA);
     }
 
     private static List<Violation> dart(String source) {
-        return BlockAlignedFormatting.checkSource("x.dart", source, Language.DART);
+        return BlockAlignLint.checkSource("x.dart", source, Language.DART);
     }
 
     @Nested

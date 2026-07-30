@@ -1,4 +1,4 @@
-package io.github.hurelhuyag.blockaligned;
+package io.github.hurelhuyag.blockalign;
 
 /**
  * The lexical differences that matter when blanking a language's literals and comments.

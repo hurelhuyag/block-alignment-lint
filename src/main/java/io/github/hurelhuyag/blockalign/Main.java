@@ -1,4 +1,4 @@
-package io.github.hurelhuyag.blockaligned;
+package io.github.hurelhuyag.blockalign;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
  * a Dart or Flutter repository, for instance:
  *
  * <pre>
- * java -jar block-aligned-formatting.jar lib test
+ * java -jar block-aligned-lint.jar lib test
  * </pre>
  *
  * Exits 0 when clean, 1 when violations were found, 2 on bad usage.
@@ -23,7 +23,7 @@ public final class Main {
      */
     public static void main(String[] args) {
         if (args.length == 0) {
-            System.err.println("usage: block-aligned-formatting <file-or-directory>...");
+            System.err.println("usage: block-aligned-lint <file-or-directory>...");
             System.exit(2);
             return;
         }
@@ -31,12 +31,12 @@ public final class Main {
         for (int i = 0; i < args.length; i++) {
             roots[i] = Path.of(args[i]);
         }
-        List<Violation> violations = BlockAlignedFormatting.check(roots);
+        List<Violation> violations = BlockAlignLint.check(roots);
         if (violations.isEmpty()) {
-            System.out.println("Block-aligned formatting: clean.");
+            System.out.println("Block alignment: clean.");
             return;
         }
-        System.err.println(BlockAlignedFormatting.describe(violations));
+        System.err.println(BlockAlignLint.describe(violations));
         System.exit(1);
     }
 }

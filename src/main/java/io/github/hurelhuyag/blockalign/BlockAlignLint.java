@@ -1,4 +1,4 @@
-package io.github.hurelhuyag.blockaligned;
+package io.github.hurelhuyag.blockalign;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -11,22 +11,22 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Entry point for the block-aligned formatting check.
+ * Entry point for the block alignment check.
  *
  * <p>Typical use from a test:
  *
  * <pre>{@code
  * @Test
  * void sources_are_block_aligned() {
- *     BlockAlignedFormatting.assertClean(Path.of("src/main/java"), Path.of("src/test/java"));
+ *     BlockAlignLint.assertClean(Path.of("src/main/java"), Path.of("src/test/java"));
  * }
  * }</pre>
  *
  * <p>No formatting is performed; the check only reports.
  */
-public final class BlockAlignedFormatting {
+public final class BlockAlignLint {
 
-    private BlockAlignedFormatting() {
+    private BlockAlignLint() {
     }
 
     /**
@@ -106,7 +106,7 @@ public final class BlockAlignedFormatting {
      */
     public static String describe(List<Violation> violations) {
         StringBuilder out = new StringBuilder();
-        out.append("Block-aligned formatting violations (").append(violations.size()).append("). ")
+        out.append("Block alignment violations (").append(violations.size()).append("). ")
                 .append("A closing `)`/`}`/`]` whose opener is on an earlier line must start its own line, ")
                 .append("indented to line up with the first character of the line that opened the block — ")
                 .append("so the `}` of a `for (...) {` sits under its `f`. Closers may only stack (`}))`) ")

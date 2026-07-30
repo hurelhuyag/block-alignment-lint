@@ -5,16 +5,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.hurelhuyag</groupId>
-    <artifactId>block-aligned-formatting</artifactId>
+    <artifactId>block-aligned-lint</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>block-aligned-formatting</name>
+    <name>block-aligned-lint</name>
     <description>
-        Checks that every closing bracket either shares a line with its opener or starts its own line,
-        aligned with the first character of the line the block began on. Supports Java and Dart.
+        Detects closing brackets that neither share a line with their opener nor start their own line
+        aligned with the first character of the line the block began on. Block-aligned code lets a
+        reviewer see nesting at a glance. Reports only — the formatting itself stays the developer's
+        call, and no file is ever rewritten. Java and Dart.
     </description>
-    <url>https://github.com/hurelhuyag/block-aligned-formatting</url>
+    <url>https://github.com/hurelhuyag/block-aligned-lint</url>
 
     <licenses>
         <license>
@@ -32,8 +34,8 @@
     </developers>
 
     <scm>
-        <url>https://github.com/hurelhuyag/block-aligned-formatting</url>
-        <developerConnection>scm:git:https://github.com/hurelhuyag/block-aligned-formatting</developerConnection>
+        <url>https://github.com/hurelhuyag/block-aligned-lint</url>
+        <developerConnection>scm:git:https://github.com/hurelhuyag/block-aligned-lint</developerConnection>
     </scm>
 
     <properties>
@@ -70,7 +72,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>io.github.hurelhuyag.blockaligned.Main</mainClass>
+                            <mainClass>io.github.hurelhuyag.blockalign.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

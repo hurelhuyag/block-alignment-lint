@@ -1,19 +1,25 @@
-# block-aligned-formatting
+# block-aligned-lint
 
-A formatting check for **Java** and **Dart**: every closing bracket must either share a line
-with its opener, or start its own line aligned with the first character of the line the block
-began on — the `}` of a `for (...) {` sits under its `f`.
+A lint for **Java** and **Dart** that reports closing brackets which have drifted: every closer
+must either share a line with its opener, or start its own line aligned with the first character
+of the line the block began on — the `}` of a `for (...) {` sits under its `f`.
 
-No formatting is performed. The check only reports.
+**It never rewrites a file.** There is no formatter here and no `--fix`. It reads your sources,
+tells you which closers are misplaced and which column each belongs at, and stops. How you get
+them there — by hand, by IDE, by not caring on a given line — stays your call.
+
+The point is review. When every closer sits under the thing it closes, a reader can see the
+nesting without counting brackets, and a diff that changes structure looks different from one
+that changes a line. A dangling `));` hides that.
 
 ```
-implementation "io.github.hurelhuyag:block-aligned-formatting:1.0.0"
+implementation "io.github.hurelhuyag:block-aligned-lint:1.0.0"
 ```
 
 ```xml
 <dependency>
     <groupId>io.github.hurelhuyag</groupId>
-    <artifactId>block-aligned-formatting</artifactId>
+    <artifactId>block-aligned-lint</artifactId>
     <version>1.0.0</version>
     <scope>test</scope>
 </dependency>
@@ -99,13 +105,13 @@ chain is where readers expect the matching closer.
 ### From a Java test
 
 ```java
-import io.github.hurelhuyag.blockaligned.BlockAlignedFormatting;
+import io.github.hurelhuyag.blockalign.BlockAlignLint;
 
 class FormattingTest {
 
     @Test
     void sources_are_block_aligned() {
-        BlockAlignedFormatting.assertClean(
+        BlockAlignLint.assertClean(
                 Path.of("src/main/java"),
                 Path.of("src/test/java")
         );
@@ -117,7 +123,7 @@ class FormattingTest {
 column it must move to. To inspect rather than assert:
 
 ```java
-List<Violation> violations = BlockAlignedFormatting.check(Path.of("src/main/java"));
+List<Violation> violations = BlockAlignLint.check(Path.of("src/main/java"));
 violations.forEach(v -> System.out.println(v.file() + ":" + v.line() + " -> col " + v.expectedColumn()));
 ```
 
@@ -128,7 +134,7 @@ violations.forEach(v -> System.out.println(v.file() + ":" + v.line() + " -> col 
 For projects Maven does not build — a Flutter repository, say:
 
 ```
-java -jar block-aligned-formatting-1.0.0.jar lib test
+java -jar block-aligned-lint-1.0.0.jar lib test
 ```
 
 Exits `0` when clean, `1` when violations were found, `2` on bad usage.

@@ -1,4 +1,4 @@
-package io.github.hurelhuyag.blockaligned;
+package io.github.hurelhuyag.blockalign;
 
 /**
  * Blanks out everything a bracket scanner must ignore — string literals and comments —

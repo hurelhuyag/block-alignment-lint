@@ -1,4 +1,4 @@
-package io.github.hurelhuyag.blockaligned;
+package io.github.hurelhuyag.blockalign;
 
 /**
  * Blanks string literals and comments so only real code brackets remain. One scanner

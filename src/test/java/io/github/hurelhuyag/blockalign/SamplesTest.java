@@ -1,4 +1,4 @@
-package io.github.hurelhuyag.blockaligned;
+package io.github.hurelhuyag.blockalign;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -33,8 +33,8 @@ class SamplesTest {
         return samples(POSITIVE).map(file -> DynamicTest.dynamicTest(
                 POSITIVE.relativize(file).toString(),
                 () -> {
-                    List<Violation> violations = BlockAlignedFormatting.checkFile(file);
-                    Assertions.assertTrue(violations.isEmpty(), () -> BlockAlignedFormatting.describe(violations));
+                    List<Violation> violations = BlockAlignLint.checkFile(file);
+                    Assertions.assertTrue(violations.isEmpty(), () -> BlockAlignLint.describe(violations));
                 }
         ));
     }
@@ -46,7 +46,7 @@ class SamplesTest {
                 () -> {
                     List<Integer> expected = markedLines(file);
                     Assertions.assertFalse(expected.isEmpty(), "sample carries no " + MARKER + " marker: " + file);
-                    List<Integer> actual = BlockAlignedFormatting.checkFile(file).stream()
+                    List<Integer> actual = BlockAlignLint.checkFile(file).stream()
                             .map(Violation::line)
                             .distinct()
                             .sorted()
@@ -55,7 +55,7 @@ class SamplesTest {
                             expected,
                             actual,
                             () -> "reported lines do not match the " + MARKER + " markers in " + file
-                                    + "\n" + BlockAlignedFormatting.describe(BlockAlignedFormatting.checkFile(file))
+                                    + "\n" + BlockAlignLint.describe(BlockAlignLint.checkFile(file))
                     );
                 }
         ));
