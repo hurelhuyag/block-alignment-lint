@@ -18,15 +18,15 @@ import java.util.stream.Stream;
  * <pre>{@code
  * @Test
  * void sources_are_block_aligned() {
- *     BlockAlignLint.assertClean(Path.of("src/main/java"), Path.of("src/test/java"));
+ *     BlockAlignmentLint.assertClean(Path.of("src/main/java"), Path.of("src/test/java"));
  * }
  * }</pre>
  *
  * <p>No formatting is performed; the check only reports.
  */
-public final class BlockAlignLint {
+public final class BlockAlignmentLint {
 
-    private BlockAlignLint() {
+    private BlockAlignmentLint() {
     }
 
     /**

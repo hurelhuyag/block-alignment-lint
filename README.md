@@ -1,4 +1,4 @@
-# block-aligned-lint
+# block-alignment-lint
 
 A lint for **Java** and **Dart** that reports closing brackets which have drifted: every closer
 must either share a line with its opener, or start its own line aligned with the first character
@@ -13,13 +13,13 @@ nesting without counting brackets, and a diff that changes structure looks diffe
 that changes a line. A dangling `));` hides that.
 
 ```
-implementation "io.github.hurelhuyag:block-aligned-lint:1.0.0"
+implementation "io.github.hurelhuyag:block-alignment-lint:1.0.0"
 ```
 
 ```xml
 <dependency>
     <groupId>io.github.hurelhuyag</groupId>
-    <artifactId>block-aligned-lint</artifactId>
+    <artifactId>block-alignment-lint</artifactId>
     <version>1.0.0</version>
     <scope>test</scope>
 </dependency>
@@ -105,13 +105,13 @@ chain is where readers expect the matching closer.
 ### From a Java test
 
 ```java
-import io.github.hurelhuyag.blockalign.BlockAlignLint;
+import io.github.hurelhuyag.blockalign.BlockAlignmentLint;
 
 class FormattingTest {
 
     @Test
     void sources_are_block_aligned() {
-        BlockAlignLint.assertClean(
+        BlockAlignmentLint.assertClean(
                 Path.of("src/main/java"),
                 Path.of("src/test/java")
         );
@@ -123,7 +123,7 @@ class FormattingTest {
 column it must move to. To inspect rather than assert:
 
 ```java
-List<Violation> violations = BlockAlignLint.check(Path.of("src/main/java"));
+List<Violation> violations = BlockAlignmentLint.check(Path.of("src/main/java"));
 violations.forEach(v -> System.out.println(v.file() + ":" + v.line() + " -> col " + v.expectedColumn()));
 ```
 
@@ -134,7 +134,7 @@ violations.forEach(v -> System.out.println(v.file() + ":" + v.line() + " -> col 
 For projects Maven does not build — a Flutter repository, say:
 
 ```
-java -jar block-aligned-lint-1.0.0.jar lib test
+java -jar block-alignment-lint-1.0.0.jar lib test
 ```
 
 Exits `0` when clean, `1` when violations were found, `2` on bad usage.

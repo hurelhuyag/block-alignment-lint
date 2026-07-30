@@ -15,7 +15,7 @@ class SelfCheckTest {
 
     @Test
     void own_sources_are_block_aligned() {
-        BlockAlignLint.assertClean(
+        BlockAlignmentLint.assertClean(
                 Path.of("src/main/java"),
                 Path.of("src/test/java")
         );

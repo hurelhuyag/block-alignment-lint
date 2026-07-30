@@ -33,8 +33,8 @@ class SamplesTest {
         return samples(POSITIVE).map(file -> DynamicTest.dynamicTest(
                 POSITIVE.relativize(file).toString(),
                 () -> {
-                    List<Violation> violations = BlockAlignLint.checkFile(file);
-                    Assertions.assertTrue(violations.isEmpty(), () -> BlockAlignLint.describe(violations));
+                    List<Violation> violations = BlockAlignmentLint.checkFile(file);
+                    Assertions.assertTrue(violations.isEmpty(), () -> BlockAlignmentLint.describe(violations));
                 }
         ));
     }
@@ -46,7 +46,7 @@ class SamplesTest {
                 () -> {
                     List<Integer> expected = markedLines(file);
                     Assertions.assertFalse(expected.isEmpty(), "sample carries no " + MARKER + " marker: " + file);
-                    List<Integer> actual = BlockAlignLint.checkFile(file).stream()
+                    List<Integer> actual = BlockAlignmentLint.checkFile(file).stream()
                             .map(Violation::line)
                             .distinct()
                             .sorted()
@@ -55,7 +55,7 @@ class SamplesTest {
                             expected,
                             actual,
                             () -> "reported lines do not match the " + MARKER + " markers in " + file
-                                    + "\n" + BlockAlignLint.describe(BlockAlignLint.checkFile(file))
+                                    + "\n" + BlockAlignmentLint.describe(BlockAlignmentLint.checkFile(file))
                     );
                 }
         ));

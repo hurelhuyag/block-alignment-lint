@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test;
 class AlignmentAnalyzerTest {
 
     private static List<Violation> java(String source) {
-        return BlockAlignLint.checkSource("x.java", source, Language.JAVA);
+        return BlockAlignmentLint.checkSource("x.java", source, Language.JAVA);
     }
 
     private static List<Violation> dart(String source) {
-        return BlockAlignLint.checkSource("x.dart", source, Language.DART);
+        return BlockAlignmentLint.checkSource("x.dart", source, Language.DART);
     }
 
     @Nested
