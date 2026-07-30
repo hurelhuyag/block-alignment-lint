@@ -1,39 +1,45 @@
 package io.github.hurelhuyag.blockaligned;
 
 /**
- * Blanks Dart string literals and comments. Dart needs more care than Java:
+ * Blanks string literals and comments so only real code brackets remain. One scanner
+ * serves every supported language; {@link Syntax} carries the two lexical differences that
+ * actually matter.
  *
- * <ul>
- *   <li>block comments nest, so an inner one does not end the outer;</li>
- *   <li>raw strings (<code>r'...'</code>) suppress both escapes and interpolation;</li>
- *   <li>triple-quoted strings span lines;</li>
- *   <li><code>${...}</code> interpolation holds arbitrary code, including strings that
- *       reuse the enclosing quote — <code>'${map['k']}'</code> is legal Dart — so
- *       interpolations are parsed recursively rather than scanned for the next matching
- *       quote. Getting this wrong desynchronises the scanner for the rest of the file.</li>
- * </ul>
+ * <p>Offsets are preserved exactly: the result has the same length as the input, newlines
+ * stay newlines and everything else stripped becomes a space, so line and column indices
+ * are identical in both strings.
  */
-public final class DartStripper implements SourceStripper {
+public final class Stripper implements SourceStripper {
 
-    /** Shared instance; the stripper holds no state. */
-    public static final DartStripper INSTANCE = new DartStripper();
+    private final Syntax syntax;
 
-    private DartStripper() {
+    /**
+     * @param syntax the lexical profile to scan with
+     */
+    public Stripper(Syntax syntax) {
+        this.syntax = syntax;
+    }
+
+    /** The profile this stripper scans with. */
+    public Syntax syntax() {
+        return syntax;
     }
 
     @Override
     public String strip(String source) {
-        return new Scan(source).run();
+        return new Scan(source, syntax).run();
     }
 
     private static final class Scan {
 
         private final String src;
+        private final Syntax syntax;
         private final StringBuilder out;
         private int i;
 
-        Scan(String src) {
+        Scan(String src, Syntax syntax) {
             this.src = src;
+            this.syntax = syntax;
             this.out = new StringBuilder(src.length());
         }
 
@@ -55,7 +61,8 @@ public final class DartStripper implements SourceStripper {
 
         /**
          * True when {@code i} begins a string literal — a quote, or an {@code r} prefix
-         * that is not merely the tail of an identifier.
+         * that is not merely the tail of an identifier. Java has no raw strings, but the
+         * identifier guard means this never fires there.
          */
         private boolean isStringStart() {
             char c = src.charAt(i);
@@ -83,10 +90,17 @@ public final class DartStripper implements SourceStripper {
             }
         }
 
+        /**
+         * Where the languages part company. With nesting, an inner opener raises depth and
+         * only the matching terminator ends the comment. Without it the first terminator
+         * wins, so anything after it on the line is code again.
+         */
         private void blankBlockComment() {
-            int depth = 0;
+            out.append("  ");
+            i += 2;
+            int depth = 1;
             while (i < src.length()) {
-                if (src.startsWith("/*", i)) {
+                if (syntax.nestedBlockComments() && src.startsWith("/*", i)) {
                     depth++;
                     out.append("  ");
                     i += 2;
@@ -104,6 +118,10 @@ public final class DartStripper implements SourceStripper {
             }
         }
 
+        /**
+         * Blanks one literal: {@code '...'}, {@code "..."} or either tripled, optionally
+         * {@code r}-prefixed. A raw string suppresses escapes and interpolation both.
+         */
         private void blankString() {
             boolean raw = false;
             if (src.charAt(i) == 'r') {
@@ -132,7 +150,7 @@ public final class DartStripper implements SourceStripper {
                     i++;
                 } else if (!isTriple && c == '\n') {
                     return; // Unterminated single-line string; bail rather than eat the file.
-                } else if (!raw && c == '$' && src.startsWith("${", i)) {
+                } else if (syntax.stringInterpolation() && !raw && src.startsWith("${", i)) {
                     out.append("  ");
                     i += 2;
                     blankInterpolation();
@@ -143,7 +161,11 @@ public final class DartStripper implements SourceStripper {
             }
         }
 
-        /** Called with {@code i} just past the {@code ${}. Blanks through the matching brace. */
+        /**
+         * Called with {@code i} just past the interpolation opener. Blanks through the
+         * matching brace, recursing into nested strings so a quote inside the interpolation
+         * cannot be mistaken for the end of the enclosing literal.
+         */
         private void blankInterpolation() {
             int depth = 1;
             while (i < src.length() && depth > 0) {

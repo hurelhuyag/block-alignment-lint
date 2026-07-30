@@ -18,22 +18,22 @@ class StripperTest {
     }
 
     private static final Case[] CASES = {
-            new Case("java line comment", JavaStripper.INSTANCE, "// ( [ {"),
-            new Case("java block comment", JavaStripper.INSTANCE, "/* ( [ { */"),
-            new Case("java string", JavaStripper.INSTANCE, "String s = \"(((\";"),
-            new Case("java escaped quote", JavaStripper.INSTANCE, "String s = \"he said \\\"hi\\\" (\";"),
-            new Case("java char literal", JavaStripper.INSTANCE, "char c = '(';"),
-            new Case("java escaped char literal", JavaStripper.INSTANCE, "char c = '\\'';"),
-            new Case("java text block", JavaStripper.INSTANCE, "String s = \"\"\"\n  { ( [\n  \"\"\";"),
-            new Case("dart line comment", DartStripper.INSTANCE, "// ( [ {"),
-            new Case("dart doc comment", DartStripper.INSTANCE, "/// ( [ {"),
-            new Case("dart nested block comment", DartStripper.INSTANCE, "/* ( /* ) */ ( */"),
-            new Case("dart string", DartStripper.INSTANCE, "var a = '(((';"),
-            new Case("dart raw string", DartStripper.INSTANCE, "var s = r'$x\\(';"),
-            new Case("dart escaped quote", DartStripper.INSTANCE, "var s = 'it\\'s (';"),
-            new Case("dart interpolation nested quote", DartStripper.INSTANCE, "var s = '${m['k']}(';"),
-            new Case("dart interpolation braces", DartStripper.INSTANCE, "var s = '${f({'a': 1})}';"),
-            new Case("dart triple quoted", DartStripper.INSTANCE, "var s = '''( ' \" (''';"),
+            new Case("java line comment", Language.JAVA.stripper(), "// ( [ {"),
+            new Case("java block comment", Language.JAVA.stripper(), "/* ( [ { */"),
+            new Case("java string", Language.JAVA.stripper(), "String s = \"(((\";"),
+            new Case("java escaped quote", Language.JAVA.stripper(), "String s = \"he said \\\"hi\\\" (\";"),
+            new Case("java char literal", Language.JAVA.stripper(), "char c = '(';"),
+            new Case("java escaped char literal", Language.JAVA.stripper(), "char c = '\\'';"),
+            new Case("java text block", Language.JAVA.stripper(), "String s = \"\"\"\n  { ( [\n  \"\"\";"),
+            new Case("dart line comment", Language.DART.stripper(), "// ( [ {"),
+            new Case("dart doc comment", Language.DART.stripper(), "/// ( [ {"),
+            new Case("dart nested block comment", Language.DART.stripper(), "/* ( /* ) */ ( */"),
+            new Case("dart string", Language.DART.stripper(), "var a = '(((';"),
+            new Case("dart raw string", Language.DART.stripper(), "var s = r'$x\\(';"),
+            new Case("dart escaped quote", Language.DART.stripper(), "var s = 'it\\'s (';"),
+            new Case("dart interpolation nested quote", Language.DART.stripper(), "var s = '${m['k']}(';"),
+            new Case("dart interpolation braces", Language.DART.stripper(), "var s = '${f({'a': 1})}';"),
+            new Case("dart triple quoted", Language.DART.stripper(), "var s = '''( ' \" (''';"),
     };
 
     @TestFactory
@@ -61,8 +61,8 @@ class StripperTest {
 
     @Test
     void real_code_outside_literals_is_left_untouched() {
-        Assertions.assertEquals("foo(bar[   ], 1);", JavaStripper.INSTANCE.strip("foo(bar[\"k\"], 1);"));
-        Assertions.assertEquals("foo(bar[   ], {   : 1});", DartStripper.INSTANCE.strip("foo(bar['k'], {'a': 1});"));
+        Assertions.assertEquals("foo(bar[   ], 1);", Language.JAVA.stripper().strip("foo(bar[\"k\"], 1);"));
+        Assertions.assertEquals("foo(bar[   ], {   : 1});", Language.DART.stripper().strip("foo(bar['k'], {'a': 1});"));
     }
 
     private static int countNewlines(String text) {

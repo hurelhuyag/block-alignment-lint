@@ -6,8 +6,8 @@ import java.util.Optional;
 /** A supported source language, and the stripper that prepares it for analysis. */
 public enum Language {
 
-    JAVA(".java", JavaStripper.INSTANCE),
-    DART(".dart", DartStripper.INSTANCE);
+    JAVA(".java", new Stripper(Syntax.JAVA)),
+    DART(".dart", new Stripper(Syntax.DART));
 
     private final String extension;
     private final SourceStripper stripper;

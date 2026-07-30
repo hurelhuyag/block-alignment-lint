@@ -135,14 +135,27 @@ Exits `0` when clean, `1` when violations were found, `2` on bad usage.
 
 ## Supported languages
 
-| Language | Extension | Notes |
-|---|---|---|
-| Java | `.java` | strings, char literals, text blocks, line and block comments |
-| Dart | `.dart` | raw strings, triple-quoted strings, `${...}` interpolation, **nested** block comments |
+| Language | Extension |
+|---|---|
+| Java | `.java` |
+| Dart | `.dart` |
 
-Bracket alignment is the same question in both, so the analyzer is shared; only the literal and
-comment stripping differs. Dart needs the extra care — `'${map['k']}'` is legal Dart, and a
-scanner that looks for the next matching quote desynchronises for the rest of the file.
+**It is one algorithm, not two.** Bracket alignment is the same question in every curly-brace
+language, and so is most of the lexing — quote pairing, backslash escapes, triple-quoted
+strings, raw-string prefixes, line and block comments all behave identically. A single
+`Stripper` does the whole job, and `Syntax` carries the only two differences that matter:
+
+| Flag | Java | Dart | Why it cannot be shared |
+|---|---|---|---|
+| `nestedBlockComments` | `false` | `true` | Java ends a comment at the first terminator, so text after it is code again; Dart nests. Get it wrong and you either leak a bracket or swallow real code. |
+| `stringInterpolation` | `false` | `true` | `'${m['k'] ?? '('}'` is legal Dart. Scanning for the next matching quote pairs them wrongly and desynchronises the scanner for the rest of the file. |
+
+Everything else Dart-only needs no flag because it is inert in Java: `'''` is not valid Java, and
+a Java identifier can never be immediately followed by a quote, so raw-string detection never
+fires. `SyntaxTest` pins all of this — including that every Java sample strips *identically*
+under both profiles.
+
+Adding a language is a `Syntax` value and an enum constant.
 
 ## Samples
 
