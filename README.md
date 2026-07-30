@@ -179,9 +179,35 @@ The project also checks its own sources (`SelfCheckTest`).
 ## Building
 
 ```
-mvn test        # 63 tests
+mvn test        # 65 tests
 mvn package     # jar, sources, javadoc
 ```
+
+## Releasing
+
+CI runs `mvn verify` on JDK 17, 21 and 25 for every push and pull request. Pushing a
+`vMAJOR.MINOR.PATCH` tag sets the POM version from the tag, runs the tests, signs the
+artifacts and publishes to Maven Central, then opens a GitHub Release with the three jars.
+
+```
+git tag v1.0.1 && git push origin v1.0.1
+```
+
+Four repository secrets are required:
+
+| Secret | Where it comes from |
+|---|---|
+| `CENTRAL_TOKEN_USERNAME` | central.sonatype.com -> View Account -> Generate User Token |
+| `CENTRAL_TOKEN_PASSWORD` | the same token's password half |
+| `GPG_PRIVATE_KEY` | `gpg --armor --export-secret-keys <KEY_ID>`, whole block including the header lines |
+| `GPG_PASSPHRASE` | the passphrase for that key |
+
+The public half of the key must be on a keyserver Central checks, e.g.
+`gpg --keyserver keyserver.ubuntu.com --send-keys <KEY_ID>`.
+
+The release job targets a `maven-central` environment. Add a required reviewer to it in
+repository settings if you want the deploy gated behind an approval — the POM sets
+`autoPublish=true`, and a version released to Central can never be replaced or withdrawn.
 
 ## License
 
