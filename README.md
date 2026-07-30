@@ -173,7 +173,7 @@ The project also checks its own sources (`SelfCheckTest`).
 ## Building
 
 ```
-mvn test        # 59 tests
+mvn test        # 63 tests
 mvn package     # jar, sources, javadoc
 ```
 
