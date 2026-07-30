@@ -6,6 +6,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The language-independent half of the check. Once a {@link SourceStripper} has blanked
@@ -28,6 +29,13 @@ public final class AlignmentAnalyzer {
 
     /** Characters that, at the end of a line, mean the next line starts something new. */
     private static final String TERMINATORS = ";{}()[],";
+
+    /**
+     * Keywords that continue a declaration header onto the next line. Everything else after
+     * a terminator starts something new.
+     */
+    private static final Set<String> DECLARATION_CONTINUATIONS =
+            Set.of("throws", "implements", "extends", "permits", "with", "on");
 
     private AlignmentAnalyzer() {
     }
@@ -130,17 +138,116 @@ public final class AlignmentAnalyzer {
             }
             line = origin;
         }
+        // A declaration keyword puts the scan into header mode, and it stays there: the rest
+        // of the header may itself be a wrapped parameter list, whose commas and parens must
+        // not stop the walk the way they would inside an argument list.
+        boolean header = false;
         while (line > 0) {
             if (startsWithContinuationOperator(code[line])) {
                 break;
             }
+            header |= continuesDeclaration(code[line]);
             String prev = code[line - 1].strip();
-            if (prev.isEmpty() || TERMINATORS.indexOf(prev.charAt(prev.length() - 1)) >= 0) {
+            if (prev.isEmpty()) {
+                break;
+            }
+            if (header && CLOSE_CHARS.indexOf(prev.charAt(0)) >= 0) {
+                // A closer-led line above a header either closes the declaration's own
+                // wrapped parameter list — keep walking from where that opened — or closes
+                // an annotation block sitting above the whole declaration, which stops it.
+                Integer origin = lineOrigin.get(line - 1);
+                if (origin == null || origin >= line - 1) {
+                    break;
+                }
+                String originLine = code[origin].strip();
+                if (!originLine.isEmpty() && originLine.charAt(0) == '@') {
+                    break;
+                }
+                line = origin;
+                continue;
+            }
+            char last = prev.charAt(prev.length() - 1);
+            boolean stop = header ? endsHeader(prev, last) : TERMINATORS.indexOf(last) >= 0;
+            if (stop) {
                 break;
             }
             line--;
         }
         return indentOf(raw[line]) + 1;
+    }
+
+    /**
+     * Whether {@code prev} sits above the whole declaration rather than inside its header.
+     *
+     * <p>Once the scan is walking a header it must cross the wrapped parameter list, so the
+     * ordinary comma and paren terminators are off. What genuinely precedes a declaration is
+     * a finished statement or block, a line that closes an earlier construct, or a complete
+     * annotation.
+     *
+     * <p>Completeness is what separates the two annotation shapes, which otherwise both
+     * begin with {@code @}:
+     *
+     * <pre>
+     * &#64;GetMapping(value = "/bulk/{id}")      balanced   -&gt; above the declaration, stop
+     *         &#64;PathVariable("id") String id)  unbalanced -&gt; inside the parameter list, keep going
+     * </pre>
+     *
+     * @param prev the stripped line above, already trimmed and known non-empty
+     * @param last its final character
+     * @return whether the header starts at or below the current line
+     */
+    private static boolean endsHeader(String prev, char last) {
+        if (";{}".indexOf(last) >= 0 || CLOSE_CHARS.indexOf(prev.charAt(0)) >= 0) {
+            return true;
+        }
+        return prev.charAt(0) == '@' && isBracketBalanced(prev);
+    }
+
+    private static boolean isBracketBalanced(String text) {
+        int depth = 0;
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (OPEN_CHARS.indexOf(c) >= 0) {
+                depth++;
+            } else if (CLOSE_CHARS.indexOf(c) >= 0) {
+                depth--;
+            }
+        }
+        return depth == 0;
+    }
+
+    /**
+     * Whether this line continues the declaration above rather than starting something new.
+     *
+     * <p>The distinction cannot be made from structure alone. These two lines above are
+     * identical in shape — both end in a closing paren that opened on the same line —
+     *
+     * <pre>
+     * public void upload(MultipartFile file)
+     *         throws IOException {        &lt;- continues the declaration
+     *
+     * if (location != null &amp;&amp; location.floorId == selected)
+     *   Positioned(                       &lt;- a body; starts something new
+     * </pre>
+     *
+     * so the answer comes from this line instead: only a declaration keyword carries a
+     * header onward. Reading it off the line above put method braces 8 columns too deep in
+     * 230 places; ignoring it dragged widget-tree closers up into their enclosing
+     * <code>if</code> in 320 more.
+     *
+     * @param line the stripped line being anchored
+     * @return whether the scan should keep walking upward past a terminator
+     */
+    private static boolean continuesDeclaration(String line) {
+        String text = line.strip();
+        int end = 0;
+        while (end < text.length() && Character.isLetter(text.charAt(end))) {
+            end++;
+        }
+        if (end == 0 || end >= text.length() || !Character.isWhitespace(text.charAt(end))) {
+            return false;
+        }
+        return DECLARATION_CONTINUATIONS.contains(text.substring(0, end));
     }
 
     /**

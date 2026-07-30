@@ -60,3 +60,18 @@ final numbers =
       10,
       (i) => i * 2,
 );
+
+/// A collection-if body. The `if (...)` header ends with `)`, but the widget below it
+/// starts a new construct and anchors on itself — it is not a declaration continuation.
+Widget conditional(bool showPin, double x) {
+  return Column(
+    children: [
+      const Text('always'),
+      if (showPin)
+        Positioned(
+          left: x,
+          child: const Text('here'),
+        ),
+    ],
+  );
+}
